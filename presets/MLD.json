@@ -1,0 +1,865 @@
+{
+  "name": "MLD",
+  "team_type": "Наша команда",
+  "champions": [
+    {
+      "name": "Зери",
+      "role": "Мид",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Zeri.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Квинн",
+      "role": "Мид",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Quinn.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Сивир",
+      "role": "Мид",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Sivir.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Смолдер",
+      "role": "Мид",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Smolder.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Гарен",
+      "role": "Мид",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Garen.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Джейс",
+      "role": "Мид",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Jayce.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Ёнэ",
+      "role": "Мид",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Yone.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Талия",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Taliyah.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Аврора",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Aurora.png",
+      "build_core": [
+        {
+          "name": "1",
+          "icon_path": "icons\\items\\Hextech_Rocketbelt.png"
+        },
+        {
+          "name": "2",
+          "icon_path": "icons\\items\\Shadowflame.png"
+        },
+        {
+          "name": "3",
+          "icon_path": "icons\\items\\Sorcerer's_Shoes.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Ари",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Burst",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Ahri.png",
+      "build_core": [
+        {
+          "name": "1",
+          "icon_path": "icons\\items\\Malignance.png"
+        },
+        {
+          "name": "2",
+          "icon_path": "icons\\items\\Shadowflame.png"
+        },
+        {
+          "name": "3",
+          "icon_path": "icons\\items\\Sorcerer's_Shoes.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Кеннен",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Burst",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Kennen.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Райз",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Ryze.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Вейгар",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Veigar.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "ВелКоз",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Velkoz.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Галио",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Galio.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Зиггс",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Ziggs.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Свейн",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Swain.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Хеймердингер",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Heimerdinger.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Энни",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Burst",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Annie.png",
+      "build_core": [
+        {
+          "name": "2",
+          "icon_path": "icons\\items\\Hextech_Rocketbelt.png"
+        },
+        {
+          "name": "3",
+          "icon_path": "icons\\items\\Sorcerer's_Shoes.png"
+        },
+        {
+          "name": "1",
+          "icon_path": "icons\\items\\Malignance.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Лиссандра",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Lissandra.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Люкс",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Lux.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Зак",
+      "role": "Мид",
+      "damage_class": "Танк",
+      "damage_type": "Frontline",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Zac.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Мальфит",
+      "role": "Мид",
+      "damage_class": "Танк",
+      "damage_type": "Engage",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Malphite.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Ког",
+      "role": "Мид",
+      "damage_class": "Гибрид",
+      "damage_type": "Гибрид Физ/Маг",
+      "tier": "S",
+      "icon_path": "icons\\champions\\KogMaw.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Варус",
+      "role": "Мид",
+      "damage_class": "Гибрид",
+      "damage_type": "Гибрид Физ/Маг",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Varus.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Милио",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "Хилер/Щит",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Milio.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "vs engage"
+    },
+    {
+      "name": "Юми",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "Хилер/Щит",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Yuumi.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "По рофлу"
+    },
+    {
+      "name": "Каин",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Kayn.png",
+      "build_core": [
+        {
+          "name": "Hubris",
+          "icon_path": "icons\\items\\Hubris.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": "1V9"
+    },
+    {
+      "name": "Чо'Гат",
+      "role": "Лес",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Chogath.png",
+      "build_core": [
+        {
+          "name": "Pr",
+          "icon_path": "icons\\items\\Hextech_Rocketbelt.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": "АП Чогатик на скейл"
+    },
+    {
+      "name": "Джарван 4",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\JarvanIV.png",
+      "build_core": [
+        {
+          "name": "2",
+          "icon_path": "icons\\items\\Black_Cleaver.png"
+        },
+        {
+          "name": "1",
+          "icon_path": "icons\\items\\Sundered_Sky.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": "Брузер билд на влет и смерть"
+    },
+    {
+      "name": "Джарван 4 (Танкобилд)",
+      "role": "Лес",
+      "damage_class": "Танк",
+      "damage_type": "Engage",
+      "tier": "A",
+      "icon_path": "icons\\champions\\JarvanIV.png",
+      "build_core": [
+        {
+          "name": "2",
+          "icon_path": "icons\\items\\Frozen_Heart.png"
+        },
+        {
+          "name": "1",
+          "icon_path": "icons\\items\\Sundered_Sky.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": "1 слот на сустейн, дальше всё в танка"
+    },
+    {
+      "name": "Шивана",
+      "role": "Лес",
+      "damage_class": "Гибрид",
+      "damage_type": "Гибрид Физ/Маг",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Shyvana.png",
+      "build_core": [
+        {
+          "name": "1",
+          "icon_path": "icons\\items\\Spear_Of_Shojin.png"
+        },
+        {
+          "name": "2",
+          "icon_path": "icons\\items\\Riftmaker.png"
+        },
+        {
+          "name": "3",
+          "icon_path": "icons\\items\\Zhonya's_Hourglass.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": "Гибридный билдачок, поук с Е"
+    },
+    {
+      "name": "Талон",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Talon.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Нужен ассасин"
+    },
+    {
+      "name": "Сайлас",
+      "role": "Лес",
+      "damage_class": "АП",
+      "damage_type": "Burst",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Sylas.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Чисто контрпик ультимейтов"
+    },
+    {
+      "name": "Гекарим",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Hecarim.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Под мидгейм+тимфайты\nТребуется унизить энеми лесника, чтобы заиграл"
+    },
+    {
+      "name": "Аатрокс",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Aatrox.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Флекс пик"
+    },
+    {
+      "name": "Виего",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Критический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Viego.png",
+      "build_core": [
+        {
+          "name": "2",
+          "icon_path": "icons\\items\\Infinity_Edge.png"
+        },
+        {
+          "name": "1",
+          "icon_path": "icons\\items\\The_Collector.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": "Коинфлип"
+    },
+    {
+      "name": "Ка'зикс",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Khazix.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "vs фулл сквишей"
+    },
+    {
+      "name": "Ксин Жао",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "A",
+      "icon_path": "icons\\champions\\XinZhao.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Чувствует себя сейчас плохо\nпик на пил"
+    },
+    {
+      "name": "Заахен",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Zaahen.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Против много melee"
+    },
+    {
+      "name": "Квинн",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Критический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Quinn.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "vs сквишей и в контрпик\nмного возможностей на ганк"
+    },
+    {
+      "name": "Седжуани",
+      "role": "Лес",
+      "damage_class": "Танк",
+      "damage_type": "CC-танк",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Sejuani.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Когда очень нужен CC-танк, но его нельзя взять в топ"
+    },
+    {
+      "name": "Лулу",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "Хилер/Щит",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Lulu.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Под гиперкерри"
+    },
+    {
+      "name": "Жанна",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "Хилер/Щит",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Janna.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Роумер"
+    },
+    {
+      "name": "Алистар",
+      "role": "Сап",
+      "damage_class": "Танк",
+      "damage_type": "Engage",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Alistar.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "На энгейдж + потанчить"
+    },
+    {
+      "name": "Наутилус",
+      "role": "Сап",
+      "damage_class": "Танк",
+      "damage_type": "CC-танк",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Nautilus.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "На контроль"
+    },
+    {
+      "name": "Браум",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "Peeler",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Braum.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "на peel"
+    },
+    {
+      "name": "Сона",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "Хилер/Щит",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Sona.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "На поук"
+    },
+    {
+      "name": "Карма",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "Хилер/Щит",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Karma.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Щиточки"
+    },
+    {
+      "name": "Сорака",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "Хилер/Щит",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Soraka.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Отхил"
+    },
+    {
+      "name": "Энни",
+      "role": "Сап",
+      "damage_class": "АП",
+      "damage_type": "Burst",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Annie.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Нужно АП-burst"
+    },
+    {
+      "name": "Леона",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "CC",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Leona.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Много контроля, условно танчит"
+    },
+    {
+      "name": "Ёнэ",
+      "role": "Топ",
+      "damage_class": "АД",
+      "damage_type": "Критический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Yone.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Дариус",
+      "role": "Топ",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Darius.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Коинфлип чамп"
+    },
+    {
+      "name": "Шен",
+      "role": "Топ",
+      "damage_class": "Танк",
+      "damage_type": "Frontline",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Shen.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Спасает"
+    },
+    {
+      "name": "Фиора",
+      "role": "Топ",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Fiora.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Коинфлип"
+    },
+    {
+      "name": "Джакс",
+      "role": "Топ",
+      "damage_class": "Гибрид",
+      "damage_type": "Гибрид Физ/Маг",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Jax.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Контрпик"
+    },
+    {
+      "name": "Атрокс",
+      "role": "Топ",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Aatrox.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Камилла",
+      "role": "Топ",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Camille.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Сион",
+      "role": "Топ",
+      "damage_class": "Танк",
+      "damage_type": "Frontline",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Sion.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Кейл",
+      "role": "Топ",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Kayle.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Скейл"
+    },
+    {
+      "name": "Амбесса",
+      "role": "Топ",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Ambessa.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Орн",
+      "role": "Топ",
+      "damage_class": "Танк",
+      "damage_type": "Frontline",
+      "tier": "A",
+      "icon_path": "icons\\champions\\Ornn.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Гвен",
+      "role": "Топ",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Gwen.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Контрпик"
+    },
+    {
+      "name": "Мальфит",
+      "role": "Топ",
+      "damage_class": "Танк",
+      "damage_type": "Engage",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Malphite.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Заахен",
+      "role": "Топ",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Zaahen.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "Флексовый пик, vs melee композиции"
+    },
+    {
+      "name": "Ренектон",
+      "role": "Топ",
+      "damage_class": "АД",
+      "damage_type": "Физический",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Renekton.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "под Dive композицию"
+    },
+    {
+      "name": "К'санте",
+      "role": "Топ",
+      "damage_class": "Танк",
+      "damage_type": "Frontline",
+      "tier": "B",
+      "icon_path": "icons\\champions\\KSante.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Рамбл",
+      "role": "Топ",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "C",
+      "icon_path": "icons\\champions\\Rumble.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    },
+    {
+      "name": "Трандл",
+      "role": "Топ",
+      "damage_class": "АД",
+      "damage_type": "Онхит",
+      "tier": "B",
+      "icon_path": "icons\\champions\\Trundle.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": ""
+    }
+  ]
+}

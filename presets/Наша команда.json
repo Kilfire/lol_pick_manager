@@ -1,0 +1,151 @@
+{
+  "name": "Наша команда",
+  "team_type": "Наша команда",
+  "champions": [
+    {
+      "name": "Jinx",
+      "role": "Адк",
+      "damage_class": "АД",
+      "damage_type": "Критический",
+      "tier": "S",
+      "icon_path": "icons/champions/Jinx.png",
+      "build_core": [
+        {
+          "name": "Kraken Slayer",
+          "icon_path": "icons/items/KrakenSlayer.png"
+        },
+        {
+          "name": "Runaan's Hurricane",
+          "icon_path": "icons/items/RunaansHurricane.png"
+        },
+        {
+          "name": "Infinity Edge",
+          "icon_path": "icons/items/InfinityEdge.png"
+        }
+      ],
+      "build_situational": [
+        {
+          "name": "Mortal Reminder",
+          "icon_path": "icons/items/MortalReminder.png"
+        }
+      ],
+      "notes": "Сильный поздний пик, нужна защита"
+    },
+    {
+      "name": "Lux",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "Burst",
+      "tier": "A",
+      "icon_path": "icons/champions/Lux.png",
+      "build_core": [
+        {
+          "name": "Luden's Tempest",
+          "icon_path": "icons/items/LudensTempest.png"
+        },
+        {
+          "name": "Shadowflame",
+          "icon_path": "icons/items/Shadowflame.png"
+        }
+      ],
+      "build_situational": [
+        {
+          "name": "Zhonya's Hourglass",
+          "icon_path": "icons/items/ZhonyasHourglass.png"
+        }
+      ],
+      "notes": "Хороший контроль, уязвима к gap-close"
+    },
+    {
+      "name": "Malphite",
+      "role": "Топ",
+      "damage_class": "Танк",
+      "damage_type": "Engage",
+      "tier": "S",
+      "icon_path": "icons/champions/Malphite.png",
+      "build_core": [
+        {
+          "name": "Sunfire Aegis",
+          "icon_path": "icons/items/SunfireAegis.png"
+        },
+        {
+          "name": "Thornmail",
+          "icon_path": "icons/items/Thornmail.png"
+        }
+      ],
+      "build_situational": [
+        {
+          "name": "Randuin's Omen",
+          "icon_path": "icons/items/RanduinsOmen.png"
+        }
+      ],
+      "notes": "Идеален против AD-compose"
+    },
+    {
+      "name": "Soraka",
+      "role": "Сап",
+      "damage_class": "Утилити",
+      "damage_type": "Хилер/Щит",
+      "tier": "A",
+      "icon_path": "icons/champions/Soraka.png",
+      "build_core": [
+        {
+          "name": "Moonstone Renewer",
+          "icon_path": "icons/items/MoonstoneRenewer.png"
+        },
+        {
+          "name": "Redemption",
+          "icon_path": "icons/items/Redemption.png"
+        }
+      ],
+      "build_situational": [
+        {
+          "name": "Mikael's Blessing",
+          "icon_path": "icons/items/MikaelsBlessing.png"
+        }
+      ],
+      "notes": "Глобальный хил, слабая к engage"
+    },
+    {
+      "name": "Kayle",
+      "role": "Топ",
+      "damage_class": "Гибрид",
+      "damage_type": "Гибрид Физ/Маг",
+      "tier": "B",
+      "icon_path": "icons/champions/Kayle.png",
+      "build_core": [
+        {
+          "name": "Nashor's Tooth",
+          "icon_path": "icons/items/NashorsTooth.png"
+        },
+        {
+          "name": "Kraken Slayer",
+          "icon_path": "icons/items/KrakenSlayer.png"
+        }
+      ],
+      "build_situational": [
+        {
+          "name": "Rabadon's Deathcap",
+          "icon_path": "icons/items/RabadonsDeathcap.png"
+        }
+      ],
+      "notes": "Слабо в ранней — сильно в поздней игре"
+    },
+    {
+      "name": "Lee Sin",
+      "role": "Лес",
+      "damage_class": "АД",
+      "damage_type": "Онхит",
+      "tier": "B",
+      "icon_path": "icons/champions/LeeSin.png",
+      "build_core": [
+        {
+          "name": "Goredrinker",
+          "icon_path": "icons/items/Goredrinker.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": "Сильный ранний газ"
+    }
+  ]
+}

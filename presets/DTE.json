@@ -1,0 +1,17 @@
+{
+  "name": "DTE",
+  "team_type": "Противники",
+  "champions": [
+    {
+      "name": "rumble",
+      "role": "Топ",
+      "damage_class": "АП",
+      "damage_type": "Магический",
+      "tier": "S",
+      "icon_path": "icons\\champions\\Rumble.png",
+      "build_core": [],
+      "build_situational": [],
+      "notes": "permaban"
+    }
+  ]
+}

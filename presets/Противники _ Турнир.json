@@ -1,0 +1,51 @@
+{
+  "name": "Противники — Турнир",
+  "team_type": "Противники",
+  "champions": [
+    {
+      "name": "Caitlyn",
+      "role": "Адк",
+      "damage_class": "АД",
+      "damage_type": "Критический",
+      "tier": "A",
+      "icon_path": "icons/champions/Caitlyn.png",
+      "build_core": [
+        {
+          "name": "Galeforce",
+          "icon_path": "icons/items/Galeforce.png"
+        },
+        {
+          "name": "Infinity Edge",
+          "icon_path": "icons/items/InfinityEdge.png"
+        }
+      ],
+      "build_situational": [
+        {
+          "name": "Lord Dominik's",
+          "icon_path": "icons/items/LordDominiks.png"
+        }
+      ],
+      "notes": "Сильный лейн, слабее в файтах"
+    },
+    {
+      "name": "Viktor",
+      "role": "Мид",
+      "damage_class": "АП",
+      "damage_type": "DOT",
+      "tier": "S",
+      "icon_path": "icons/champions/Viktor.png",
+      "build_core": [
+        {
+          "name": "Luden's Tempest",
+          "icon_path": "icons/items/LudensTempest.png"
+        },
+        {
+          "name": "Void Staff",
+          "icon_path": "icons/items/VoidStaff.png"
+        }
+      ],
+      "build_situational": [],
+      "notes": "Топ мид-лейнер, стабильный урон"
+    }
+  ]
+}

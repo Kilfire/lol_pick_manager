@@ -1,0 +1,309 @@
+/* ════════════════════════════════════════════════════════════
+   LoL Picks Manager — Dark Theme (League of Legends style)
+   ════════════════════════════════════════════════════════════ */
+
+* {
+    font-family: "Segoe UI", "Arial", sans-serif;
+    color: #C8AA6E;
+}
+
+QMainWindow, QDialog {
+    background-color: #0A0E1A;
+}
+
+QWidget {
+    background-color: #0A0E1A;
+    color: #C8AA6E;
+}
+
+/* ── Верхняя панель ─────────────────────────────────────── */
+#topBar {
+    background-color: #091428;
+    border-bottom: 2px solid #C89B3C;
+    padding: 4px 0;
+}
+
+#appTitle {
+    font-size: 20px;
+    font-weight: bold;
+    color: #C89B3C;
+    letter-spacing: 2px;
+}
+
+/* ── Боковая панель ─────────────────────────────────────── */
+#sidePanel {
+    background-color: #091428;
+    border-right: 1px solid #1E2A3A;
+    min-width: 220px;
+    max-width: 220px;
+}
+
+#presetList {
+    background-color: #0D1626;
+    border: 1px solid #1E2A3A;
+    border-radius: 4px;
+    outline: none;
+    padding: 4px;
+}
+
+#presetList::item {
+    padding: 8px 10px;
+    border-radius: 3px;
+    color: #A0A8B0;
+}
+
+#presetList::item:selected {
+    background-color: #1A3A5C;
+    color: #C8AA6E;
+    border-left: 3px solid #C89B3C;
+}
+
+#presetList::item:hover {
+    background-color: #152236;
+}
+
+/* ── Кнопки ─────────────────────────────────────────────── */
+QPushButton {
+    background-color: #1E2A3A;
+    color: #C8AA6E;
+    border: 1px solid #C89B3C;
+    border-radius: 3px;
+    padding: 6px 14px;
+    font-size: 12px;
+}
+
+QPushButton:hover {
+    background-color: #C89B3C;
+    color: #0A0E1A;
+}
+
+QPushButton:pressed {
+    background-color: #A07830;
+}
+
+QPushButton:disabled {
+    color: #4A5060;
+    border-color: #2A3040;
+    background-color: #141C28;
+}
+
+QPushButton#btnDanger {
+    border-color: #C0392B;
+    color: #E74C3C;
+}
+QPushButton#btnDanger:hover {
+    background-color: #C0392B;
+    color: #fff;
+}
+
+QPushButton#btnSuccess {
+    border-color: #27AE60;
+    color: #2ECC71;
+}
+QPushButton#btnSuccess:hover {
+    background-color: #27AE60;
+    color: #fff;
+}
+
+QPushButton#btnGoogle {
+    border-color: #4285F4;
+    color: #4285F4;
+}
+QPushButton#btnGoogle:hover {
+    background-color: #4285F4;
+    color: #fff;
+}
+
+/* ── Таблица ─────────────────────────────────────────────── */
+QTableWidget {
+    background-color: #0D1626;
+    alternate-background-color: #111D2E;
+    gridline-color: #1E2A3A;
+    border: 1px solid #1E2A3A;
+    border-radius: 4px;
+    selection-background-color: #1A3A5C;
+    selection-color: #C8AA6E;
+    outline: none;
+}
+
+QTableWidget::item {
+    padding: 4px 8px;
+    border: none;
+}
+
+QHeaderView::section {
+    background-color: #091428;
+    color: #C89B3C;
+    border: none;
+    border-bottom: 2px solid #C89B3C;
+    border-right: 1px solid #1E2A3A;
+    padding: 6px 10px;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+/* ── ComboBox ────────────────────────────────────────────── */
+QComboBox {
+    background-color: #1E2A3A;
+    border: 1px solid #C89B3C;
+    border-radius: 3px;
+    padding: 4px 8px;
+    color: #C8AA6E;
+    min-width: 100px;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+
+QComboBox::down-arrow {
+    width: 10px;
+    height: 10px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #C89B3C;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #1E2A3A;
+    border: 1px solid #C89B3C;
+    selection-background-color: #C89B3C;
+    selection-color: #0A0E1A;
+    color: #C8AA6E;
+}
+
+/* ── LineEdit / TextEdit ─────────────────────────────────── */
+QLineEdit, QTextEdit, QPlainTextEdit {
+    background-color: #1E2A3A;
+    border: 1px solid #3A4A5A;
+    border-radius: 3px;
+    padding: 4px 8px;
+    color: #C8AA6E;
+}
+
+QLineEdit:focus, QTextEdit:focus {
+    border-color: #C89B3C;
+}
+
+/* ── ScrollBar ───────────────────────────────────────────── */
+QScrollBar:vertical {
+    background: #0D1626;
+    width: 8px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: #3A4A5A;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #C89B3C;
+}
+
+QScrollBar:horizontal {
+    background: #0D1626;
+    height: 8px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #3A4A5A;
+    border-radius: 4px;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line { height: 0; width: 0; }
+
+/* ── Label ───────────────────────────────────────────────── */
+QLabel {
+    color: #C8AA6E;
+}
+
+QLabel#sectionTitle {
+    font-size: 13px;
+    font-weight: bold;
+    color: #C89B3C;
+    letter-spacing: 1px;
+    padding: 6px 0 4px 0;
+}
+
+/* ── GroupBox ────────────────────────────────────────────── */
+QGroupBox {
+    border: 1px solid #2A3A4A;
+    border-radius: 4px;
+    margin-top: 16px;
+    color: #C89B3C;
+    font-weight: bold;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 4px;
+}
+
+/* ── TabWidget ───────────────────────────────────────────── */
+QTabWidget::pane {
+    border: 1px solid #1E2A3A;
+    background-color: #0A0E1A;
+}
+
+QTabBar::tab {
+    background-color: #091428;
+    color: #6A7A8A;
+    border: 1px solid #1E2A3A;
+    border-bottom: none;
+    padding: 6px 16px;
+    margin-right: 2px;
+}
+
+QTabBar::tab:selected {
+    background-color: #0A0E1A;
+    color: #C89B3C;
+    border-top: 2px solid #C89B3C;
+}
+
+/* ── Statusbar ───────────────────────────────────────────── */
+QStatusBar {
+    background-color: #091428;
+    color: #6A7A8A;
+    border-top: 1px solid #1E2A3A;
+    font-size: 11px;
+}
+
+/* ── Dialogs ─────────────────────────────────────────────── */
+QDialog {
+    background-color: #0D1626;
+}
+
+QMessageBox {
+    background-color: #0D1626;
+}
+
+/* ── Splitter ────────────────────────────────────────────── */
+QSplitter::handle {
+    background-color: #1E2A3A;
+}
+
+QSplitter::handle:horizontal { width: 2px; }
+QSplitter::handle:vertical   { height: 2px; }
+
+/* ── ToolTip ─────────────────────────────────────────────── */
+QToolTip {
+    background-color: #1E2A3A;
+    color: #C8AA6E;
+    border: 1px solid #C89B3C;
+    padding: 4px;
+    border-radius: 3px;
+}
+
+/* ── Чип роли (используется в таблице) ──────────────────── */
+.role-chip {
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: bold;
+}
