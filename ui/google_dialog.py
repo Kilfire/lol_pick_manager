@@ -1,6 +1,6 @@
 """
 Диалог подключения к Google Sheets (через сервисный аккаунт) и управления
-пресетами в облаке.
+пресетами в облаке. Поддерживает переключение языка интерфейса (RU/EN).
 """
 import os
 import webbrowser
@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 
 from core.google_sheets import sheets_manager, SERVICE_ACCOUNT_FILE
+from core.i18n import tr, lang_manager
 
 
 class WorkerThread(QThread):
@@ -39,115 +40,149 @@ class GoogleSheetsDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("☁ Google Sheets")
         self.setMinimumSize(520, 600)
         self.setModal(True)
         self._build_ui()
+        self.retranslate_ui()
         self._refresh_status()
+
+        lang_manager.add_listener(self.retranslate_ui)
+
+    def closeEvent(self, event):
+        lang_manager.remove_listener(self.retranslate_ui)
+        super().closeEvent(event)
+
+    def done(self, result):
+        lang_manager.remove_listener(self.retranslate_ui)
+        super().done(result)
 
     def _build_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(10)
 
         # ── Настройка подключения ────────────────────────────────────────────
-        grpSetup = QGroupBox("Настройка подключения")
-        setupLayout = QVBoxLayout(grpSetup)
+        self.grpSetup = QGroupBox()
+        setupLayout = QVBoxLayout(self.grpSetup)
 
-        self.lblCredStatus = QLabel("service_account.json: не найден")
+        self.lblCredStatus = QLabel()
         setupLayout.addWidget(self.lblCredStatus)
 
-        self.lblBotEmail = QLabel("Email сервисного аккаунта: —")
+        self.lblBotEmail = QLabel()
         self.lblBotEmail.setWordWrap(True)
         self.lblBotEmail.setStyleSheet("color: #8A9AB0; font-size: 11px;")
         setupLayout.addWidget(self.lblBotEmail)
 
         row1 = QHBoxLayout()
-        btnPickCreds = QPushButton("📁 Выбрать service_account.json")
-        btnPickCreds.clicked.connect(self._pick_service_account)
-        row1.addWidget(btnPickCreds)
+        self.btnPickCreds = QPushButton()
+        self.btnPickCreds.clicked.connect(self._pick_service_account)
+        row1.addWidget(self.btnPickCreds)
 
-        btnHowTo = QPushButton("? Как настроить?")
-        btnHowTo.clicked.connect(self._open_howto)
-        row1.addWidget(btnHowTo)
+        self.btnHowTo = QPushButton()
+        self.btnHowTo.clicked.connect(self._open_howto)
+        row1.addWidget(self.btnHowTo)
         setupLayout.addLayout(row1)
 
         idRow = QHBoxLayout()
-        idRow.addWidget(QLabel("ID таблицы:"))
+        self.lblSpreadsheetId = QLabel()
+        idRow.addWidget(self.lblSpreadsheetId)
         self.editSpreadsheetId = QLineEdit()
-        self.editSpreadsheetId.setPlaceholderText(
-            "Например: 1kFGXyIg13DdVI-2GxYHtBMW0K5znEkezitexhpmWX0s")
         idRow.addWidget(self.editSpreadsheetId, 1)
         setupLayout.addLayout(idRow)
 
-        btnSaveId = QPushButton("💾 Сохранить ID таблицы")
-        btnSaveId.clicked.connect(self._save_spreadsheet_id)
-        setupLayout.addWidget(btnSaveId)
+        self.btnSaveId = QPushButton()
+        self.btnSaveId.clicked.connect(self._save_spreadsheet_id)
+        setupLayout.addWidget(self.btnSaveId)
 
-        layout.addWidget(grpSetup)
+        layout.addWidget(self.grpSetup)
 
         # ── Статус подключения ────────────────────────────────────────────────
-        grpConn = QGroupBox("Подключение")
-        connLayout = QVBoxLayout(grpConn)
+        self.grpConn = QGroupBox()
+        connLayout = QVBoxLayout(self.grpConn)
 
-        self.lblStatus = QLabel("Не подключено")
+        self.lblStatus = QLabel()
         self.lblStatus.setAlignment(Qt.AlignmentFlag.AlignCenter)
         connLayout.addWidget(self.lblStatus)
 
         row2 = QHBoxLayout()
-        self.btnConnect = QPushButton("🔗 Подключиться")
+        self.btnConnect = QPushButton()
         self.btnConnect.setObjectName("btnGoogle")
         self.btnConnect.clicked.connect(self._connect)
         row2.addWidget(self.btnConnect)
 
-        self.btnDisconnect = QPushButton("Отключиться")
+        self.btnDisconnect = QPushButton()
         self.btnDisconnect.clicked.connect(self._disconnect)
         row2.addWidget(self.btnDisconnect)
 
-        self.btnOpenSheet = QPushButton("🌐 Открыть таблицу")
+        self.btnOpenSheet = QPushButton()
         self.btnOpenSheet.clicked.connect(self._open_spreadsheet)
         row2.addWidget(self.btnOpenSheet)
         connLayout.addLayout(row2)
 
-        layout.addWidget(grpConn)
+        layout.addWidget(self.grpConn)
 
         # ── Список пресетов в облаке ─────────────────────────────────────────
-        grpPresets = QGroupBox("☁ Пресеты в Google Sheets")
-        presLayout = QVBoxLayout(grpPresets)
+        self.grpPresets = QGroupBox()
+        presLayout = QVBoxLayout(self.grpPresets)
 
         self.listPresets = QListWidget()
         presLayout.addWidget(self.listPresets)
 
-        btnRefresh = QPushButton("🔄 Обновить список")
-        btnRefresh.clicked.connect(self._refresh_presets)
-        presLayout.addWidget(btnRefresh)
+        self.btnRefresh = QPushButton()
+        self.btnRefresh.clicked.connect(self._refresh_presets)
+        presLayout.addWidget(self.btnRefresh)
 
         presRow = QHBoxLayout()
-        btnLoad = QPushButton("⬇ Загрузить пресет")
-        btnLoad.setObjectName("btnSuccess")
-        btnLoad.clicked.connect(self._load_selected)
-        presRow.addWidget(btnLoad)
+        self.btnLoad = QPushButton()
+        self.btnLoad.setObjectName("btnSuccess")
+        self.btnLoad.clicked.connect(self._load_selected)
+        presRow.addWidget(self.btnLoad)
 
-        btnDelete = QPushButton("✕ Удалить пресет")
-        btnDelete.setObjectName("btnDanger")
-        btnDelete.clicked.connect(self._delete_selected)
-        presRow.addWidget(btnDelete)
+        self.btnDelete = QPushButton()
+        self.btnDelete.setObjectName("btnDanger")
+        self.btnDelete.clicked.connect(self._delete_selected)
+        presRow.addWidget(self.btnDelete)
         presLayout.addLayout(presRow)
 
-        layout.addWidget(grpPresets)
+        layout.addWidget(self.grpPresets)
 
         # ── Лог ──────────────────────────────────────────────────────────────
-        grpLog = QGroupBox("Журнал")
-        logLayout = QVBoxLayout(grpLog)
+        self.grpLog = QGroupBox()
+        logLayout = QVBoxLayout(self.grpLog)
         self.logEdit = QTextEdit()
         self.logEdit.setReadOnly(True)
         self.logEdit.setMaximumHeight(90)
         logLayout.addWidget(self.logEdit)
-        layout.addWidget(grpLog)
+        layout.addWidget(self.grpLog)
 
         # ── Закрыть ───────────────────────────────────────────────────────────
-        btnClose = QPushButton("Закрыть")
-        btnClose.clicked.connect(self.accept)
-        layout.addWidget(btnClose)
+        self.btnClose = QPushButton()
+        self.btnClose.clicked.connect(self.accept)
+        layout.addWidget(self.btnClose)
+
+    # ── Перевод ───────────────────────────────────────────────────────────────
+
+    def retranslate_ui(self):
+        self.setWindowTitle(tr("gsheets_title"))
+        self.grpSetup.setTitle(tr("gsheets_setup_group"))
+        self.btnPickCreds.setText(tr("btn_pick_credentials"))
+        self.btnHowTo.setText(tr("btn_howto"))
+        self.lblSpreadsheetId.setText(tr("label_spreadsheet_id"))
+        self.btnSaveId.setText(tr("btn_save_spreadsheet_id"))
+
+        self.grpConn.setTitle(tr("gsheets_conn_group"))
+        self.btnConnect.setText(tr("btn_connect"))
+        self.btnDisconnect.setText(tr("btn_disconnect"))
+        self.btnOpenSheet.setText(tr("btn_open_sheet"))
+
+        self.grpPresets.setTitle(tr("gsheets_presets_group"))
+        self.btnRefresh.setText(tr("btn_refresh_list"))
+        self.btnLoad.setText(tr("btn_load_preset"))
+        self.btnDelete.setText(tr("btn_delete_preset_cloud"))
+
+        self.grpLog.setTitle(tr("gsheets_log_group"))
+        self.btnClose.setText(tr("btn_close"))
+
+        self._refresh_status()
 
     # ── Вспомогательные ───────────────────────────────────────────────────────
 
@@ -157,10 +192,10 @@ class GoogleSheetsDialog(QDialog):
     def _refresh_status(self):
         connected = sheets_manager.is_connected()
         if connected:
-            self.lblStatus.setText("✅ Подключено к Google Sheets")
+            self.lblStatus.setText(tr("gsheets_connected"))
             self.lblStatus.setStyleSheet("color: #2ECC71; font-weight: bold;")
         else:
-            self.lblStatus.setText("❌ Не подключено")
+            self.lblStatus.setText(tr("gsheets_disconnected_status"))
             self.lblStatus.setStyleSheet("color: #E74C3C;")
 
         self.btnConnect.setEnabled(not connected)
@@ -169,15 +204,14 @@ class GoogleSheetsDialog(QDialog):
 
         # Статус service_account.json
         if sheets_manager.has_service_account_file():
-            self.lblCredStatus.setText("service_account.json: ✅ найден")
+            self.lblCredStatus.setText(tr("gsheets_cred_found"))
             self.lblCredStatus.setStyleSheet("color: #2ECC71;")
             email = sheets_manager.get_service_account_email()
-            self.lblBotEmail.setText(
-                f"Email сервисного аккаунта (дайте ему доступ «Редактор» к таблице):\n{email}")
+            self.lblBotEmail.setText(f"{tr('gsheets_bot_email')}\n{email}")
         else:
-            self.lblCredStatus.setText("service_account.json: ❌ не найден")
+            self.lblCredStatus.setText(tr("gsheets_cred_not_found"))
             self.lblCredStatus.setStyleSheet("color: #E74C3C;")
-            self.lblBotEmail.setText("Email сервисного аккаунта: —")
+            self.lblBotEmail.setText(tr("gsheets_bot_email"))
 
         self.editSpreadsheetId.setText(sheets_manager.get_spreadsheet_id())
 
@@ -186,12 +220,12 @@ class GoogleSheetsDialog(QDialog):
 
     def _pick_service_account(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Выбрать service_account.json", ".",
+            self, tr("btn_pick_credentials"), ".",
             "JSON (*.json)")
         if path:
             import shutil
             shutil.copy(path, SERVICE_ACCOUNT_FILE)
-            self._log(f"service_account.json скопирован из {path}")
+            self._log(f"service_account.json ← {path}")
             self._refresh_status()
 
     def _save_spreadsheet_id(self):
@@ -204,13 +238,12 @@ class GoogleSheetsDialog(QDialog):
                 pass
         sheets_manager.set_spreadsheet_id(raw)
         self.editSpreadsheetId.setText(raw)
-        self._log(f"ID таблицы сохранён: {raw}")
+        self._log(f"ID: {raw}")
 
     def _connect(self):
         self._save_spreadsheet_id()
         self.btnConnect.setEnabled(False)
-        self.btnConnect.setText("Подключение...")
-        self._log("Выполняется подключение к Google Sheets...")
+        self._log(tr("gsheets_disconnected_status"))   # placeholder cleared below
 
         self._worker = WorkerThread(sheets_manager.connect)
         self._worker.done.connect(self._on_connect_done)
@@ -220,15 +253,11 @@ class GoogleSheetsDialog(QDialog):
         self._log(msg)
         self._refresh_status()
         if not ok:
-            self.btnConnect.setText("🔗 Подключиться")
             self.btnConnect.setEnabled(True)
-            QMessageBox.warning(self, "Не удалось подключиться", msg)
-        else:
-            self.btnConnect.setText("🔗 Подключиться")
+            QMessageBox.warning(self, tr("btn_connect"), msg)
 
     def _disconnect(self):
         sheets_manager.disconnect()
-        self._log("Отключено от Google Sheets")
         self._refresh_status()
 
     def _open_spreadsheet(self):
@@ -237,7 +266,25 @@ class GoogleSheetsDialog(QDialog):
             webbrowser.open(url)
 
     def _open_howto(self):
-        msg = """Как настроить общую таблицу для команды (один раз, делает капитан):
+        lang = lang_manager.get_language()
+        if lang == "en":
+            msg = """How to set up a shared spreadsheet for the team (one-time, done by the captain):
+
+1. console.cloud.google.com → create a project
+2. Enable "Google Sheets API" and "Google Drive API"
+3. IAM & Admin → Service Accounts → Create
+4. Open the account → "Keys" → Add key → JSON → download
+5. Rename to service_account.json, place next to main.py
+6. Create a Google Sheet → "Share" → paste the service account
+   email (shown in this window after picking the file) → role "Editor"
+7. Copy the spreadsheet ID from the browser address bar and paste
+   it into the "Spreadsheet ID" field above → "Save spreadsheet ID"
+
+After that, EVERY team member who has service_account.json and
+knows the spreadsheet ID connects instantly — no browser, no
+Google password needed."""
+        else:
+            msg = """Как настроить общую таблицу для команды (один раз, делает капитан):
 
 1. console.cloud.google.com → создать проект
 2. Включить «Google Sheets API» и «Google Drive API»
@@ -252,15 +299,13 @@ class GoogleSheetsDialog(QDialog):
 После этого КАЖДЫЙ член команды, получив файл service_account.json
 и зная ID таблицы, подключается мгновенно — без браузера и без
 ввода пароля Google."""
-        QMessageBox.information(self, "Как настроить подключение", msg)
+        QMessageBox.information(self, tr("btn_howto"), msg)
 
     def _refresh_presets(self):
         self.listPresets.clear()
         names = sheets_manager.list_presets()
         for name in names:
             self.listPresets.addItem(name)
-        if not names and sheets_manager.is_connected():
-            self._log("В таблице пока нет пресетов")
 
     def _load_selected(self):
         item = self.listPresets.currentItem()
@@ -268,7 +313,6 @@ class GoogleSheetsDialog(QDialog):
             return
         name = item.text()
         self.presetLoaded.emit(name)
-        self._log(f"Запрошена загрузка пресета «{name}»")
 
     def _delete_selected(self):
         item = self.listPresets.currentItem()
@@ -276,8 +320,8 @@ class GoogleSheetsDialog(QDialog):
             return
         name = item.text()
         reply = QMessageBox.question(
-            self, "Удалить пресет",
-            f"Удалить пресет «{name}» из Google Sheets?\nДействие необратимо.",
+            self, self.btnDelete.text(),
+            f"{name}?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:

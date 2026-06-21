@@ -1,5 +1,7 @@
 """
 Главное окно приложения LoL Picks Manager.
+Поддерживает переключение языка интерфейса (RU/EN) через переключатель
+в верхней панели.
 """
 import os
 import json
@@ -12,8 +14,9 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize
 from PyQt6.QtGui import QAction, QFont, QColor
 
-from core.models import Preset, Champion, get_example_presets
+from core.models import Preset, Champion, get_example_presets, team_type_display, TEAM_TYPE_DISPLAY_KEYS
 from core.google_sheets import sheets_manager
+from core.i18n import tr, lang_manager
 from ui.champion_table import ChampionTable
 from ui.champion_dialog import ChampionDialog
 from ui.google_dialog import GoogleSheetsDialog
@@ -40,7 +43,6 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("LoL Picks Manager  •  Tournament Tool")
         self.setMinimumSize(1100, 700)
         self.resize(1300, 780)
 
@@ -51,6 +53,18 @@ class MainWindow(QMainWindow):
         self._build_ui()
         self._build_statusbar()
 
+        # Синхронизируем переключатель языка с сохранённым значением (без
+        # повторного срабатывания currentIndexChanged, чтобы не дёргать
+        # set_language лишний раз на старте)
+        self.comboLanguage.blockSignals(True)
+        idx = self.comboLanguage.findData(lang_manager.get_language())
+        if idx >= 0:
+            self.comboLanguage.setCurrentIndex(idx)
+        self.comboLanguage.blockSignals(False)
+
+        self.retranslate_ui()
+        lang_manager.add_listener(self.retranslate_ui)
+
         self._load_local_presets()
         self._try_auto_connect_google()
 
@@ -60,50 +74,50 @@ class MainWindow(QMainWindow):
         mb = self.menuBar()
 
         # Файл
-        fileMenu = mb.addMenu("Файл")
-        actNewPreset = QAction("Новый пресет", self)
-        actNewPreset.setShortcut("Ctrl+N")
-        actNewPreset.triggered.connect(self._new_preset)
-        fileMenu.addAction(actNewPreset)
+        self.fileMenu = mb.addMenu("")
+        self.actNewPreset = QAction(self)
+        self.actNewPreset.setShortcut("Ctrl+N")
+        self.actNewPreset.triggered.connect(self._new_preset)
+        self.fileMenu.addAction(self.actNewPreset)
 
-        actSaveLocal = QAction("Сохранить пресет (JSON)", self)
-        actSaveLocal.setShortcut("Ctrl+S")
-        actSaveLocal.triggered.connect(self._save_current_local)
-        fileMenu.addAction(actSaveLocal)
+        self.actSaveLocal = QAction(self)
+        self.actSaveLocal.setShortcut("Ctrl+S")
+        self.actSaveLocal.triggered.connect(self._save_current_local)
+        self.fileMenu.addAction(self.actSaveLocal)
 
-        actLoadLocal = QAction("Открыть пресет (JSON)...", self)
-        actLoadLocal.setShortcut("Ctrl+O")
-        actLoadLocal.triggered.connect(self._load_local_file)
-        fileMenu.addAction(actLoadLocal)
+        self.actLoadLocal = QAction(self)
+        self.actLoadLocal.setShortcut("Ctrl+O")
+        self.actLoadLocal.triggered.connect(self._load_local_file)
+        self.fileMenu.addAction(self.actLoadLocal)
 
-        fileMenu.addSeparator()
-        actQuit = QAction("Выход", self)
-        actQuit.setShortcut("Ctrl+Q")
-        actQuit.triggered.connect(self.close)
-        fileMenu.addAction(actQuit)
+        self.fileMenu.addSeparator()
+        self.actQuit = QAction(self)
+        self.actQuit.setShortcut("Ctrl+Q")
+        self.actQuit.triggered.connect(self.close)
+        self.fileMenu.addAction(self.actQuit)
 
         # Google
-        cloudMenu = mb.addMenu("☁ Google Sheets")
-        actGoogleDialog = QAction("Управление Google Sheets...", self)
-        actGoogleDialog.triggered.connect(self._open_google_dialog)
-        cloudMenu.addAction(actGoogleDialog)
+        self.cloudMenu = mb.addMenu("")
+        self.actGoogleDialog = QAction(self)
+        self.actGoogleDialog.triggered.connect(self._open_google_dialog)
+        self.cloudMenu.addAction(self.actGoogleDialog)
 
-        actSaveGoogle = QAction("Сохранить текущий пресет → Sheets", self)
-        actSaveGoogle.triggered.connect(self._save_current_google)
-        cloudMenu.addAction(actSaveGoogle)
+        self.actSaveGoogle = QAction(self)
+        self.actSaveGoogle.triggered.connect(self._save_current_google)
+        self.cloudMenu.addAction(self.actSaveGoogle)
 
         # Чемпионы
-        champMenu = mb.addMenu("Чемпионы")
-        actAdd = QAction("Добавить чемпиона", self)
-        actAdd.setShortcut("Ctrl+A")
-        actAdd.triggered.connect(self._add_champion)
-        champMenu.addAction(actAdd)
+        self.champMenu = mb.addMenu("")
+        self.actAdd = QAction(self)
+        self.actAdd.setShortcut("Ctrl+A")
+        self.actAdd.triggered.connect(self._add_champion)
+        self.champMenu.addAction(self.actAdd)
 
         # Справка
-        helpMenu = mb.addMenu("Справка")
-        actAbout = QAction("О программе", self)
-        actAbout.triggered.connect(self._show_about)
-        helpMenu.addAction(actAbout)
+        self.helpMenu = mb.addMenu("")
+        self.actAbout = QAction(self)
+        self.actAbout.triggered.connect(self._show_about)
+        self.helpMenu.addAction(self.actAbout)
 
     # ── UI ────────────────────────────────────────────────────────────────────
 
@@ -121,20 +135,32 @@ class MainWindow(QMainWindow):
         topLayout = QHBoxLayout(topBar)
         topLayout.setContentsMargins(16, 0, 16, 0)
 
-        title = QLabel("⚔  LoL Picks Manager")
-        title.setObjectName("appTitle")
-        topLayout.addWidget(title)
+        self.lblTitle = QLabel()
+        self.lblTitle.setObjectName("appTitle")
+        topLayout.addWidget(self.lblTitle)
         topLayout.addStretch()
 
+        # ── Переключатель языка ─────────────────────────────────────────────
+        self.lblLanguage = QLabel()
+        self.lblLanguage.setStyleSheet("color: #6A7A8A; font-size: 11px;")
+        topLayout.addWidget(self.lblLanguage)
+
+        self.comboLanguage = QComboBox()
+        self.comboLanguage.addItem("Русский", "ru")
+        self.comboLanguage.addItem("English", "en")
+        self.comboLanguage.setFixedWidth(110)
+        self.comboLanguage.currentIndexChanged.connect(self._on_language_changed)
+        topLayout.addWidget(self.comboLanguage)
+
         # Google status
-        self.lblGoogleStatus = QLabel("☁ Не подключено")
+        self.lblGoogleStatus = QLabel()
         self.lblGoogleStatus.setStyleSheet("color: #6A7A8A; font-size: 11px;")
         topLayout.addWidget(self.lblGoogleStatus)
 
-        btnGoogle = QPushButton("☁ Google Sheets")
-        btnGoogle.setObjectName("btnGoogle")
-        btnGoogle.clicked.connect(self._open_google_dialog)
-        topLayout.addWidget(btnGoogle)
+        self.btnGoogle = QPushButton()
+        self.btnGoogle.setObjectName("btnGoogle")
+        self.btnGoogle.clicked.connect(self._open_google_dialog)
+        topLayout.addWidget(self.btnGoogle)
 
         mainLayout.addWidget(topBar)
 
@@ -148,9 +174,9 @@ class MainWindow(QMainWindow):
         leftLayout.setContentsMargins(10, 12, 10, 12)
         leftLayout.setSpacing(8)
 
-        lblPresets = QLabel("ПРЕСЕТЫ")
-        lblPresets.setObjectName("sectionTitle")
-        leftLayout.addWidget(lblPresets)
+        self.lblPresetsTitle = QLabel()
+        self.lblPresetsTitle.setObjectName("sectionTitle")
+        leftLayout.addWidget(self.lblPresetsTitle)
 
         self.listPresets = QListWidget()
         self.listPresets.setObjectName("presetList")
@@ -158,16 +184,20 @@ class MainWindow(QMainWindow):
         leftLayout.addWidget(self.listPresets, 1)
 
         # Кнопки пресетов
-        for text, slot in [
-            ("+ Новый пресет",    self._new_preset),
-            ("📂 Загрузить JSON", self._load_local_file),
-            ("💾 Сохранить JSON", self._save_current_local),
-            ("☁ Сохранить→Sheets", self._save_current_google),
-            ("✕ Удалить пресет", self._delete_current_preset),
+        self.btnNewPreset   = QPushButton()
+        self.btnLoadJson    = QPushButton()
+        self.btnSaveJson    = QPushButton()
+        self.btnSaveSheets  = QPushButton()
+        self.btnDeletePreset = QPushButton()
+        self.btnDeletePreset.setObjectName("btnDanger")
+
+        for btn, slot in [
+            (self.btnNewPreset,    self._new_preset),
+            (self.btnLoadJson,     self._load_local_file),
+            (self.btnSaveJson,     self._save_current_local),
+            (self.btnSaveSheets,   self._save_current_google),
+            (self.btnDeletePreset, self._delete_current_preset),
         ]:
-            btn = QPushButton(text)
-            if "Удалить" in text:
-                btn.setObjectName("btnDanger")
             leftLayout.addWidget(btn)
             btn.clicked.connect(slot)
 
@@ -178,13 +208,13 @@ class MainWindow(QMainWindow):
         leftLayout.addWidget(sep)
 
         # Инфо о текущем пресете
-        lblInfo = QLabel("ИНФО")
-        lblInfo.setObjectName("sectionTitle")
-        leftLayout.addWidget(lblInfo)
+        self.lblInfoTitle = QLabel()
+        self.lblInfoTitle.setObjectName("sectionTitle")
+        leftLayout.addWidget(self.lblInfoTitle)
 
         self.lblPresetName  = QLabel("—")
         self.lblPresetType  = QLabel("—")
-        self.lblChampCount  = QLabel("Чемпионов: 0")
+        self.lblChampCount  = QLabel()
 
         for lbl in [self.lblPresetName, self.lblPresetType, self.lblChampCount]:
             lbl.setWordWrap(True)
@@ -201,15 +231,15 @@ class MainWindow(QMainWindow):
 
         # Заголовок + кнопка добавления
         headerRow = QHBoxLayout()
-        self.lblTableTitle = QLabel("Выберите пресет")
+        self.lblTableTitle = QLabel()
         self.lblTableTitle.setObjectName("sectionTitle")
         headerRow.addWidget(self.lblTableTitle)
         headerRow.addStretch()
 
-        btnAdd = QPushButton("+ Добавить чемпиона")
-        btnAdd.setObjectName("btnSuccess")
-        btnAdd.clicked.connect(self._add_champion)
-        headerRow.addWidget(btnAdd)
+        self.btnAddChampion = QPushButton()
+        self.btnAddChampion.setObjectName("btnSuccess")
+        self.btnAddChampion.clicked.connect(self._add_champion)
+        headerRow.addWidget(self.btnAddChampion)
         rightLayout.addLayout(headerRow)
 
         # Таблица
@@ -225,7 +255,71 @@ class MainWindow(QMainWindow):
         mainLayout.addWidget(splitter, 1)
 
     def _build_statusbar(self):
-        self.statusBar().showMessage("Готово  |  LoL Picks Manager")
+        self.statusBar().showMessage("")
+
+    # ── Перевод ───────────────────────────────────────────────────────────────
+
+    def retranslate_ui(self):
+        self.setWindowTitle("LoL Picks Manager  •  Tournament Tool")
+
+        # Меню
+        self.fileMenu.setTitle(tr("menu_file"))
+        self.actNewPreset.setText(tr("menu_new_preset"))
+        self.actSaveLocal.setText(tr("menu_save_local"))
+        self.actLoadLocal.setText(tr("menu_load_local"))
+        self.actQuit.setText(tr("menu_quit"))
+
+        self.cloudMenu.setTitle(tr("menu_cloud"))
+        self.actGoogleDialog.setText(tr("menu_cloud_manage"))
+        self.actSaveGoogle.setText(tr("menu_cloud_save"))
+
+        self.champMenu.setTitle(tr("menu_champions"))
+        self.actAdd.setText(tr("menu_add_champion"))
+
+        self.helpMenu.setTitle(tr("menu_help"))
+        self.actAbout.setText(tr("menu_about"))
+
+        # Верхняя панель
+        self.lblTitle.setText(tr("app_title"))
+        self.lblLanguage.setText(tr("language"))
+        self.btnGoogle.setText(tr("menu_cloud"))
+        self._update_google_status()
+
+        # Левая панель
+        self.lblPresetsTitle.setText(tr("presets_title"))
+        self.btnNewPreset.setText(tr("btn_new_preset"))
+        self.btnLoadJson.setText(tr("btn_load_json"))
+        self.btnSaveJson.setText(tr("btn_save_json"))
+        self.btnSaveSheets.setText(tr("btn_save_sheets"))
+        self.btnDeletePreset.setText(tr("btn_delete_preset"))
+        self.lblInfoTitle.setText(tr("info_title"))
+
+        if self._current_preset:
+            self.lblChampCount.setText(
+                tr("champ_count", n=len(self._current_preset.champions)))
+        else:
+            self.lblChampCount.setText(tr("champ_count", n=0))
+
+        # Правая панель
+        if self._current_preset:
+            self.lblTableTitle.setText(
+                f"{self._current_preset.name}  [{team_type_display(self._current_preset.team_type)}]")
+            self.lblPresetType.setText(f"🏆 {team_type_display(self._current_preset.team_type)}")
+        else:
+            self.lblTableTitle.setText(tr("select_preset"))
+        self.btnAddChampion.setText(tr("btn_add_champion"))
+
+        self.statusBar().showMessage(tr("status_ready"))
+
+        # Обновляем список пресетов (там есть переведённый team_type в тексте — нет,
+        # но язык влияет на цвет/иконку только опосредованно; сам список не хранит
+        # переведённый текст, поэтому достаточно перерисовать)
+        self._refresh_preset_list()
+
+    def _on_language_changed(self):
+        lang_code = self.comboLanguage.currentData()
+        if lang_code:
+            lang_manager.set_language(lang_code)
 
     # ── Пресеты ───────────────────────────────────────────────────────────────
 
@@ -253,6 +347,8 @@ class MainWindow(QMainWindow):
             self.listPresets.setCurrentRow(0)
 
     def _refresh_preset_list(self):
+        current_row = self.listPresets.currentRow()
+        self.listPresets.blockSignals(True)
         self.listPresets.clear()
         for preset in self._presets:
             item = QListWidgetItem(preset.name)
@@ -262,6 +358,9 @@ class MainWindow(QMainWindow):
             icon_text = "🔵" if preset.team_type == "Наша команда" else "🔴"
             item.setText(f"{icon_text} {preset.name}")
             self.listPresets.addItem(item)
+        self.listPresets.blockSignals(False)
+        if 0 <= current_row < self.listPresets.count():
+            self.listPresets.setCurrentRow(current_row)
 
     def _on_preset_selected(self, row: int):
         if row < 0 or row >= len(self._presets):
@@ -269,48 +368,52 @@ class MainWindow(QMainWindow):
         self._current_preset = self._presets[row]
         self.champTable.set_champions(self._current_preset.champions)
         self.lblTableTitle.setText(
-            f"{self._current_preset.name}  [{self._current_preset.team_type}]")
+            f"{self._current_preset.name}  [{team_type_display(self._current_preset.team_type)}]")
         self.lblPresetName.setText(f"📋 {self._current_preset.name}")
-        self.lblPresetType.setText(f"🏆 {self._current_preset.team_type}")
+        self.lblPresetType.setText(f"🏆 {team_type_display(self._current_preset.team_type)}")
         self.lblChampCount.setText(
-            f"Чемпионов: {len(self._current_preset.champions)}")
+            tr("champ_count", n=len(self._current_preset.champions)))
         self.statusBar().showMessage(
-            f"Пресет: {self._current_preset.name}  •  "
-            f"{len(self._current_preset.champions)} чемпионов")
+            tr("status_preset_info", name=self._current_preset.name,
+               n=len(self._current_preset.champions)))
 
     def _new_preset(self):
-        name, ok = QInputDialog.getText(self, "Новый пресет", "Название пресета:")
+        name, ok = QInputDialog.getText(self, tr("menu_new_preset"), tr("label_name"))
         if not ok or not name.strip():
             return
-        team, ok2 = QInputDialog.getItem(
-            self, "Тип команды", "Выберите тип:",
-            ["Наша команда", "Противники"], 0, False)
+
+        team_options = [tr("team_ours"), tr("team_enemy")]
+        internal_values = ["Наша команда", "Противники"]
+        prompt = "Team type:" if lang_manager.get_language() == "en" else "Тип команды:"
+        team_label, ok2 = QInputDialog.getItem(
+            self, tr("menu_new_preset"), prompt,
+            team_options, 0, False)
         if not ok2:
             return
-        preset = Preset(name=name.strip(), team_type=team)
+        team_internal = internal_values[team_options.index(team_label)]
+
+        preset = Preset(name=name.strip(), team_type=team_internal)
         self._presets.append(preset)
         self._refresh_preset_list()
         self.listPresets.setCurrentRow(len(self._presets) - 1)
-        self.statusBar().showMessage(f"Создан новый пресет: {preset.name}")
 
     def _save_current_local(self):
         if not self._current_preset:
-            QMessageBox.warning(self, "Нет пресета", "Сначала выберите пресет.")
+            QMessageBox.warning(self, tr("btn_save_json"), tr("select_preset"))
             return
         path = self._current_preset.save_local(PRESETS_DIR)
-        self.statusBar().showMessage(f"Сохранено: {path}")
-        QMessageBox.information(self, "Сохранено",
-                                f"Пресет сохранён:\n{path}")
+        self.statusBar().showMessage(path)
+        QMessageBox.information(self, tr("btn_save_json"), path)
 
     def _load_local_file(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Открыть пресет", PRESETS_DIR, "JSON (*.json)")
+            self, tr("menu_load_local"), PRESETS_DIR, "JSON (*.json)")
         if not path:
             return
         try:
             preset = Preset.load_local(path)
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось загрузить:\n{e}")
+            QMessageBox.critical(self, tr("menu_load_local"), str(e))
             return
         # Проверяем, не загружен ли уже
         for i, p in enumerate(self._presets):
@@ -318,26 +421,24 @@ class MainWindow(QMainWindow):
                 self._presets[i] = preset
                 self._refresh_preset_list()
                 self.listPresets.setCurrentRow(i)
-                self.statusBar().showMessage(f"Обновлён: {preset.name}")
                 return
         self._presets.append(preset)
         self._refresh_preset_list()
         self.listPresets.setCurrentRow(len(self._presets) - 1)
-        self.statusBar().showMessage(f"Загружен: {preset.name}")
 
     def _delete_current_preset(self):
         if not self._current_preset:
             return
         reply = QMessageBox.question(
-            self, "Удалить пресет",
-            f"Удалить «{self._current_preset.name}»?",
+            self, tr("btn_delete_preset"),
+            f"{self._current_preset.name}?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             self._presets.remove(self._current_preset)
             self._current_preset = None
             self._refresh_preset_list()
             self.champTable.set_champions([])
-            self.lblTableTitle.setText("Выберите пресет")
+            self.lblTableTitle.setText(tr("select_preset"))
 
     # ── Google Sheets ──────────────────────────────────────────────────────────
 
@@ -350,17 +451,13 @@ class MainWindow(QMainWindow):
         if not sheets_manager.get_spreadsheet_id():
             return
 
-        self.statusBar().showMessage("Подключение к Google Sheets...")
         self._autoconnect_worker = _AutoConnectWorker(sheets_manager)
         self._autoconnect_worker.done.connect(self._on_auto_connect_done)
         self._autoconnect_worker.start()
 
     def _on_auto_connect_done(self, ok: bool, msg: str):
         self._update_google_status()
-        if ok:
-            self.statusBar().showMessage(f"☁ {msg}")
-        else:
-            self.statusBar().showMessage(f"☁ Не удалось подключиться: {msg}")
+        self.statusBar().showMessage(f"☁ {msg}")
 
     def _open_google_dialog(self):
         dlg = GoogleSheetsDialog(self)
@@ -370,27 +467,24 @@ class MainWindow(QMainWindow):
 
     def _update_google_status(self):
         if sheets_manager.is_connected():
-            self.lblGoogleStatus.setText("☁ Подключено к Sheets")
+            self.lblGoogleStatus.setText(f"☁ {tr('gsheets_connected')}")
             self.lblGoogleStatus.setStyleSheet("color: #2ECC71; font-size: 11px;")
         else:
-            self.lblGoogleStatus.setText("☁ Не подключено")
+            self.lblGoogleStatus.setText(f"☁ {tr('gsheets_not_connected')}")
             self.lblGoogleStatus.setStyleSheet("color: #6A7A8A; font-size: 11px;")
 
     def _save_current_google(self):
         if not self._current_preset:
-            QMessageBox.warning(self, "Нет пресета", "Сначала выберите пресет.")
+            QMessageBox.warning(self, tr("btn_save_sheets"), tr("select_preset"))
             return
         if not sheets_manager.is_connected():
-            QMessageBox.information(
-                self, "Не подключено",
-                "Сначала подключитесь к Google Sheets через меню ☁")
             self._open_google_dialog()
             return
         ok, msg = sheets_manager.save_preset(self._current_preset)
         if ok:
-            QMessageBox.information(self, "Сохранено", msg)
+            QMessageBox.information(self, tr("btn_save_sheets"), msg)
         else:
-            QMessageBox.critical(self, "Ошибка", msg)
+            QMessageBox.critical(self, tr("btn_save_sheets"), msg)
         self.statusBar().showMessage(msg)
 
     def _load_from_google(self, preset_name: str):
@@ -398,7 +492,7 @@ class MainWindow(QMainWindow):
             return
         preset, msg = sheets_manager.load_preset(preset_name)
         if preset is None:
-            QMessageBox.critical(self, "Ошибка", msg)
+            QMessageBox.critical(self, tr("btn_load_preset"), msg)
             return
         # Обновляем или добавляем
         for i, p in enumerate(self._presets):
@@ -406,19 +500,16 @@ class MainWindow(QMainWindow):
                 self._presets[i] = preset
                 self._refresh_preset_list()
                 self.listPresets.setCurrentRow(i)
-                self.statusBar().showMessage(f"Загружен из Sheets: {preset.name}")
                 return
         self._presets.append(preset)
         self._refresh_preset_list()
         self.listPresets.setCurrentRow(len(self._presets) - 1)
-        self.statusBar().showMessage(f"Загружен из Sheets: {preset.name}  •  {msg}")
 
     # ── Чемпионы ──────────────────────────────────────────────────────────────
 
     def _add_champion(self):
         if not self._current_preset:
-            QMessageBox.warning(self, "Нет пресета",
-                                "Сначала создайте или выберите пресет.")
+            QMessageBox.warning(self, tr("menu_add_champion"), tr("select_preset"))
             return
         dlg = ChampionDialog(parent=self)
         if dlg.exec():
@@ -426,8 +517,7 @@ class MainWindow(QMainWindow):
             self._current_preset.champions.append(champ)
             self.champTable.set_champions(self._current_preset.champions)
             self.lblChampCount.setText(
-                f"Чемпионов: {len(self._current_preset.champions)}")
-            self.statusBar().showMessage(f"Добавлен: {champ.name}")
+                tr("champ_count", n=len(self._current_preset.champions)))
 
     def _edit_champion(self, idx: int):
         if not self._current_preset:
@@ -438,43 +528,60 @@ class MainWindow(QMainWindow):
             updated = dlg.get_champion()
             self._current_preset.champions[idx] = updated
             self.champTable.set_champions(self._current_preset.champions)
-            self.statusBar().showMessage(f"Обновлён: {updated.name}")
 
     def _delete_champion(self, idx: int):
         if not self._current_preset:
             return
         champ = self._current_preset.champions[idx]
         reply = QMessageBox.question(
-            self, "Удалить чемпиона",
-            f"Удалить «{champ.name}» из пресета?",
+            self, tr("btn_delete"),
+            f"{champ.name}?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             self._current_preset.champions.pop(idx)
             self.champTable.set_champions(self._current_preset.champions)
             self.lblChampCount.setText(
-                f"Чемпионов: {len(self._current_preset.champions)}")
-            self.statusBar().showMessage(f"Удалён: {champ.name}")
+                tr("champ_count", n=len(self._current_preset.champions)))
 
     # ── Справка ───────────────────────────────────────────────────────────────
 
     def _show_about(self):
-        QMessageBox.about(
-            self, "О программе",
-            "<b>LoL Picks Manager</b><br>"
-            "Инструмент для управления пиками на турнирах по League of Legends<br><br>"
-            "Функции:<br>"
-            "• Управление пресетами чемпионов для разных команд<br>"
-            "• Роль (Топ/Лес/Мид/Адк/Сап) и класс урона (АД/АП/Танк/Утилити/Гибрид)<br>"
-            "• Фильтрация по роли, классу урона, тиру и имени<br>"
-            "• Сортировка по роли → классу урона → тиру<br>"
-            "• Сохранение в JSON (локально) и Google Sheets (облако, общий доступ)<br>"
-            "• Иконки чемпионов и предметов<br>"
-            "• Основной и ситуативный билды<br><br>"
-            "Иконки чемпионов: <code>icons/champions/ИМЯ.png</code><br>"
-            "Иконки предметов: <code>icons/items/ИМЯ.png</code><br><br>"
-            "Облачная синхронизация использует сервисный аккаунт Google "
-            "(<code>service_account.json</code>) — без браузерной авторизации."
-        )
+        lang = lang_manager.get_language()
+        if lang == "en":
+            text = (
+                "<b>LoL Picks Manager</b><br>"
+                "A tool for managing League of Legends tournament picks/bans<br><br>"
+                "Features:<br>"
+                "• Manage champion presets for different teams<br>"
+                "• Role (Top/Jungle/Mid/ADC/Support) and damage class (AD/AP/Tank/Utility/Hybrid)<br>"
+                "• Filter by role, damage class, tier and name<br>"
+                "• Sort by role → damage class → tier<br>"
+                "• Save to JSON (local) and Google Sheets (cloud, shared access)<br>"
+                "• Champion and item icons<br>"
+                "• Core and situational builds<br><br>"
+                "Champion icons: <code>icons/champions/NAME.png</code><br>"
+                "Item icons: <code>icons/items/NAME.png</code><br><br>"
+                "Cloud sync uses a Google service account "
+                "(<code>service_account.json</code>) — no browser login required."
+            )
+        else:
+            text = (
+                "<b>LoL Picks Manager</b><br>"
+                "Инструмент для управления пиками на турнирах по League of Legends<br><br>"
+                "Функции:<br>"
+                "• Управление пресетами чемпионов для разных команд<br>"
+                "• Роль (Топ/Лес/Мид/Адк/Сап) и класс урона (АД/АП/Танк/Утилити/Гибрид)<br>"
+                "• Фильтрация по роли, классу урона, тиру и имени<br>"
+                "• Сортировка по роли → классу урона → тиру<br>"
+                "• Сохранение в JSON (локально) и Google Sheets (облако, общий доступ)<br>"
+                "• Иконки чемпионов и предметов<br>"
+                "• Основной и ситуативный билды<br><br>"
+                "Иконки чемпионов: <code>icons/champions/ИМЯ.png</code><br>"
+                "Иконки предметов: <code>icons/items/ИМЯ.png</code><br><br>"
+                "Облачная синхронизация использует сервисный аккаунт Google "
+                "(<code>service_account.json</code>) — без браузерной авторизации."
+            )
+        QMessageBox.about(self, tr("menu_about"), text)
 
     def closeEvent(self, event):
         # Автосохранение всех пресетов

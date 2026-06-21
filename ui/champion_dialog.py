@@ -1,5 +1,6 @@
 """
 Диалог добавления / редактирования чемпиона.
+Поддерживает переключение языка интерфейса (RU/EN).
 """
 import os
 from PyQt6.QtWidgets import (
@@ -13,12 +14,27 @@ from PyQt6.QtGui import QPixmap, QIcon
 
 from core.models import (
     Champion, BuildItem, ROLES, DAMAGE_CLASSES, DETAILED_DAMAGE_TYPES,
-    TIER_LIST,
+    TIER_LIST, role_display, damage_class_display,
 )
+from core.i18n import tr, lang_manager
 from ui.icon_picker_dialog import IconPickerDialog
 
 # Базовая директория проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _set_combo_items(combo: QComboBox, items: list[str], display_fn=None):
+    """Заполняет ComboBox парами (переведённый_текст, внутреннее_значение)."""
+    combo.clear()
+    for value in items:
+        label = display_fn(value) if display_fn else value
+        combo.addItem(label, value)
+
+
+def _select_combo_by_data(combo: QComboBox, value: str):
+    idx = combo.findData(value)
+    if idx >= 0:
+        combo.setCurrentIndex(idx)
 
 
 class BuildItemWidget(QWidget):
@@ -39,16 +55,16 @@ class BuildItemWidget(QWidget):
 
         # Имя предмета
         self.nameEdit = QLineEdit(item.name)
-        self.nameEdit.setPlaceholderText("Название предмета")
+        self.nameEdit.setPlaceholderText(tr("item_name_ph"))
         self.nameEdit.textChanged.connect(lambda t: setattr(self.item, "name", t))
         layout.addWidget(self.nameEdit, 1)
 
         # Выбор иконки
-        btnIcon = QPushButton("📁")
-        btnIcon.setFixedWidth(30)
-        btnIcon.setToolTip("Выбрать иконку предмета")
-        btnIcon.clicked.connect(self._pick_icon)
-        layout.addWidget(btnIcon)
+        self.btnIcon = QPushButton("📁")
+        self.btnIcon.setFixedWidth(30)
+        self.btnIcon.setToolTip(tr("btn_pick_icon"))
+        self.btnIcon.clicked.connect(self._pick_icon)
+        layout.addWidget(self.btnIcon)
 
         # Удалить
         btnDel = QPushButton("✕")
@@ -56,6 +72,12 @@ class BuildItemWidget(QWidget):
         btnDel.setObjectName("btnDanger")
         btnDel.clicked.connect(self._remove)
         layout.addWidget(btnDel)
+
+        lang_manager.add_listener(self.retranslate_ui)
+
+    def retranslate_ui(self):
+        self.nameEdit.setPlaceholderText(tr("item_name_ph"))
+        self.btnIcon.setToolTip(tr("btn_pick_icon"))
 
     def _set_icon(self, path: str):
         if not path:
@@ -72,7 +94,7 @@ class BuildItemWidget(QWidget):
     def _pick_icon(self):
         dlg = IconPickerDialog(
             folder="icons/items",
-            title="Выбор иконки предмета",
+            title=tr("icon_picker_title_item"),
             parent=self,
         )
         if dlg.exec():
@@ -86,6 +108,7 @@ class BuildItemWidget(QWidget):
                 self.nameEdit.setText(name_guess)
 
     def _remove(self):
+        lang_manager.remove_listener(self.retranslate_ui)
         parent_layout = self.parent().layout() if self.parent() else None
         if parent_layout:
             parent_layout.removeWidget(self)
@@ -98,8 +121,9 @@ class BuildItemWidget(QWidget):
 class BuildSection(QGroupBox):
     """Секция билда (основной / ситуативный)."""
 
-    def __init__(self, title: str, items: list, parent=None):
-        super().__init__(title, parent)
+    def __init__(self, title_key: str, items: list, parent=None):
+        super().__init__(tr(title_key), parent)
+        self._title_key = title_key
         self._layout = QVBoxLayout(self)
         self._layout.setSpacing(4)
         self._widgets: list[BuildItemWidget] = []
@@ -107,9 +131,15 @@ class BuildSection(QGroupBox):
         for item in items:
             self._add_widget(item)
 
-        btnAdd = QPushButton("+ Добавить предмет")
-        btnAdd.clicked.connect(self._add_empty)
-        self._layout.addWidget(btnAdd)
+        self.btnAdd = QPushButton(tr("btn_add_item"))
+        self.btnAdd.clicked.connect(self._add_empty)
+        self._layout.addWidget(self.btnAdd)
+
+        lang_manager.add_listener(self.retranslate_ui)
+
+    def retranslate_ui(self):
+        self.setTitle(tr(self._title_key))
+        self.btnAdd.setText(tr("btn_add_item"))
 
     def _add_widget(self, item: BuildItem):
         w = BuildItemWidget(item, self)
@@ -137,11 +167,15 @@ class ChampionDialog(QDialog):
     Гибрид) — независимые поля, так как один и тот же класс урона может
     встречаться на любой позиции (например, АП-мид и АП-сап). Подробный
     тип урона зависит от выбранного класса урона.
+
+    ComboBox-ы ролей/класса хранят ВНУТРЕННЕЕ (русское) значение через
+    userData — поэтому переключение языка не теряет выбор.
     """
 
     def __init__(self, champion: Champion = None, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Чемпион" if champion is None else f"Редактирование: {champion.name}")
+        self._is_edit = champion is not None
+        self._edit_name = champion.name if champion else ""
         self.setMinimumSize(540, 700)
         self.setModal(True)
 
@@ -150,6 +184,15 @@ class ChampionDialog(QDialog):
 
         self._build_ui()
         self._load_champion()
+        self._update_window_title()
+
+        lang_manager.add_listener(self.retranslate_ui)
+
+    def _update_window_title(self):
+        if self._is_edit:
+            self.setWindowTitle(tr("champion_dialog_edit_title", name=self._edit_name))
+        else:
+            self.setWindowTitle(tr("champion_dialog_title"))
 
     # ── UI ────────────────────────────────────────────────────────────────────
 
@@ -178,90 +221,123 @@ class ChampionDialog(QDialog):
         self.iconLabel.setText("?")
         topRow.addWidget(self.iconLabel)
 
-        btnPickIcon = QPushButton("🖼 Выбрать иконку")
-        btnPickIcon.setToolTip("Открыть галерею иконок чемпионов")
-        btnPickIcon.clicked.connect(self._pick_champion_icon)
-        topRow.addWidget(btnPickIcon, alignment=Qt.AlignmentFlag.AlignTop)
+        self.btnPickIcon = QPushButton()
+        self.btnPickIcon.clicked.connect(self._pick_champion_icon)
+        topRow.addWidget(self.btnPickIcon, alignment=Qt.AlignmentFlag.AlignTop)
         topRow.addStretch()
         layout.addLayout(topRow)
 
         # ── Форма ────────────────────────────────────────────────────────────
-        form = QFormLayout()
-        form.setSpacing(10)
+        self.form = QFormLayout()
+        self.form.setSpacing(10)
 
         self.editName = QLineEdit()
-        self.editName.setPlaceholderText("Введите имя чемпиона")
-        form.addRow("Имя:", self.editName)
+        self.lblName = QLabel()
+        self.form.addRow(self.lblName, self.editName)
 
         self.comboRole = QComboBox()
-        self.comboRole.addItems(ROLES)
-        form.addRow("Роль (позиция):", self.comboRole)
+        _set_combo_items(self.comboRole, ROLES, role_display)
+        self.lblRole = QLabel()
+        self.form.addRow(self.lblRole, self.comboRole)
 
         self.comboClass = QComboBox()
-        self.comboClass.addItems(DAMAGE_CLASSES)
-        self.comboClass.currentTextChanged.connect(self._update_detailed_types)
-        form.addRow("Класс урона:", self.comboClass)
+        _set_combo_items(self.comboClass, DAMAGE_CLASSES, damage_class_display)
+        self.comboClass.currentIndexChanged.connect(
+            lambda _: self._update_detailed_types(self.comboClass.currentData()))
+        self.lblClass = QLabel()
+        self.form.addRow(self.lblClass, self.comboClass)
 
         self.comboDetailed = QComboBox()
-        form.addRow("Подробный тип:", self.comboDetailed)
+        self.lblDetailed = QLabel()
+        self.form.addRow(self.lblDetailed, self.comboDetailed)
 
         self.comboTier = QComboBox()
-        self.comboTier.addItems(TIER_LIST)
-        form.addRow("Место в тирлисте:", self.comboTier)
+        self.comboTier.addItems(TIER_LIST)   # тиры (S/A/B/C) не переводятся
+        self.lblTier = QLabel()
+        self.form.addRow(self.lblTier, self.comboTier)
 
-        layout.addLayout(form)
+        layout.addLayout(self.form)
 
         # ── Билд: основной ───────────────────────────────────────────────────
         self.buildCore = BuildSection(
-            "🗡️ Основной билд", self.champion.build_core)
+            "group_build_core", self.champion.build_core)
         layout.addWidget(self.buildCore)
 
         # ── Билд: ситуативный ────────────────────────────────────────────────
         self.buildSit = BuildSection(
-            "⚡ Ситуативные предметы", self.champion.build_situational)
+            "group_build_sit", self.champion.build_situational)
         layout.addWidget(self.buildSit)
 
         # ── Заметки ──────────────────────────────────────────────────────────
-        grpNotes = QGroupBox("📝 Заметки")
-        notesLayout = QVBoxLayout(grpNotes)
+        self.grpNotes = QGroupBox()
+        notesLayout = QVBoxLayout(self.grpNotes)
         self.editNotes = QTextEdit()
-        self.editNotes.setPlaceholderText(
-            "Сильные стороны, слабые стороны, советы по пику...")
         self.editNotes.setMaximumHeight(80)
         notesLayout.addWidget(self.editNotes)
-        layout.addWidget(grpNotes)
+        layout.addWidget(self.grpNotes)
 
         root.addWidget(scroll, 1)
 
         # ── Кнопки ───────────────────────────────────────────────────────────
         btnRow = QHBoxLayout()
-        btnSave = QPushButton("✔ Сохранить")
-        btnSave.setObjectName("btnSuccess")
-        btnSave.clicked.connect(self._save)
+        self.btnSave = QPushButton()
+        self.btnSave.setObjectName("btnSuccess")
+        self.btnSave.clicked.connect(self._save)
 
-        btnCancel = QPushButton("Отмена")
-        btnCancel.clicked.connect(self.reject)
+        self.btnCancel = QPushButton()
+        self.btnCancel.clicked.connect(self.reject)
 
         btnRow.addStretch()
-        btnRow.addWidget(btnCancel)
-        btnRow.addWidget(btnSave)
+        btnRow.addWidget(self.btnCancel)
+        btnRow.addWidget(self.btnSave)
         root.addLayout(btnRow)
 
         # Инициализируем подробные типы под первый класс урона
         self._update_detailed_types(DAMAGE_CLASSES[0])
+
+        self.retranslate_ui()
+
+    # ── Перевод ───────────────────────────────────────────────────────────────
+
+    def retranslate_ui(self):
+        self._update_window_title()
+
+        self.btnPickIcon.setText(tr("btn_pick_icon"))
+        self.btnPickIcon.setToolTip(tr("icon_picker_title_champ"))
+
+        self.lblName.setText(tr("label_name"))
+        self.editName.setPlaceholderText(tr("name_placeholder"))
+
+        self.lblRole.setText(tr("label_role"))
+        self.lblClass.setText(tr("label_class"))
+        self.lblDetailed.setText(tr("label_detailed"))
+        self.lblTier.setText(tr("label_tier"))
+
+        # Перестраиваем комбобоксы ролей/класса с сохранением выбора
+        prev_role = self.comboRole.currentData()
+        _set_combo_items(self.comboRole, ROLES, role_display)
+        if prev_role:
+            _select_combo_by_data(self.comboRole, prev_role)
+
+        prev_class = self.comboClass.currentData()
+        _set_combo_items(self.comboClass, DAMAGE_CLASSES, damage_class_display)
+        if prev_class:
+            _select_combo_by_data(self.comboClass, prev_class)
+        self._update_detailed_types(self.comboClass.currentData())
+
+        self.grpNotes.setTitle(tr("group_notes"))
+        self.editNotes.setPlaceholderText(tr("notes_placeholder"))
+
+        self.btnSave.setText(tr("btn_confirm_save"))
+        self.btnCancel.setText(tr("btn_cancel"))
 
     # ── Логика ───────────────────────────────────────────────────────────────
 
     def _load_champion(self):
         self.editName.setText(self.champion.name)
 
-        idx_r = self.comboRole.findText(self.champion.role)
-        if idx_r >= 0:
-            self.comboRole.setCurrentIndex(idx_r)
-
-        idx_c = self.comboClass.findText(self.champion.damage_class)
-        if idx_c >= 0:
-            self.comboClass.setCurrentIndex(idx_c)
+        _select_combo_by_data(self.comboRole, self.champion.role)
+        _select_combo_by_data(self.comboClass, self.champion.damage_class)
 
         self._update_detailed_types(self.champion.damage_class)
         idx_d = self.comboDetailed.findText(self.champion.damage_type)
@@ -276,13 +352,17 @@ class ChampionDialog(QDialog):
         self._refresh_icon()
 
     def _update_detailed_types(self, damage_class: str):
+        if not damage_class:
+            return
         self.comboDetailed.clear()
+        # Подробные типы урона пока не переведены (используются как произвольный
+        # описательный текст, специфичный для каждого класса урона)
         self.comboDetailed.addItems(DETAILED_DAMAGE_TYPES.get(damage_class, []))
 
     def _pick_champion_icon(self):
         dlg = IconPickerDialog(
             folder="icons/champions",
-            title="Выбор иконки чемпиона",
+            title=tr("icon_picker_title_champ"),
             parent=self,
         )
         if dlg.exec():
@@ -320,8 +400,8 @@ class ChampionDialog(QDialog):
             return
 
         self.champion.name         = name
-        self.champion.role         = self.comboRole.currentText()
-        self.champion.damage_class = self.comboClass.currentText()
+        self.champion.role         = self.comboRole.currentData()
+        self.champion.damage_class = self.comboClass.currentData()
         self.champion.damage_type  = self.comboDetailed.currentText()
         self.champion.tier         = self.comboTier.currentText()
         self.champion.icon_path    = self._icon_path

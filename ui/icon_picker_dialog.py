@@ -1,6 +1,7 @@
 """
 Диалог выбора иконки из встроенной галереи (icons/champions или icons/items).
 Показывает сетку превью с возможностью поиска по имени файла.
+Поддерживает переключение языка интерфейса (RU/EN).
 """
 import os
 from PyQt6.QtWidgets import (
@@ -9,6 +10,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap
+
+from core.i18n import tr, lang_manager
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -68,13 +71,16 @@ class IconPickerDialog(QDialog):
     Окно выбора иконки внутри программы: показывает сетку всех изображений
     из заданной папки (по умолчанию icons/champions). Двойной клик или кнопка
     «Выбрать» возвращают относительный путь к файлу.
+
+    Параметр title передаётся снаружи уже переведённым (вызывающий код сам
+    решает, "Выбор иконки чемпиона" это или "Choose item icon").
     """
 
-    def __init__(self, folder: str = "icons/champions", title: str = "Выбор иконки", parent=None):
+    def __init__(self, folder: str = "icons/champions", title: str = None, parent=None):
         super().__init__(parent)
         self.folder = folder
         self.full_folder = os.path.join(BASE_DIR, folder)
-        self.setWindowTitle(title)
+        self._external_title = title
         self.setMinimumSize(640, 560)
         self.setModal(True)
 
@@ -84,6 +90,17 @@ class IconPickerDialog(QDialog):
 
         self._build_ui()
         self._load_icons()
+        self.retranslate_ui()
+
+        lang_manager.add_listener(self.retranslate_ui)
+
+    def closeEvent(self, event):
+        lang_manager.remove_listener(self.retranslate_ui)
+        super().closeEvent(event)
+
+    def done(self, result):
+        lang_manager.remove_listener(self.retranslate_ui)
+        super().done(result)
 
     # ── UI ────────────────────────────────────────────────────────────────────
 
@@ -93,9 +110,9 @@ class IconPickerDialog(QDialog):
 
         # ── Поиск ────────────────────────────────────────────────────────────
         searchRow = QHBoxLayout()
-        searchRow.addWidget(QLabel("Поиск:"))
+        self.lblSearch = QLabel()
+        searchRow.addWidget(self.lblSearch)
         self.searchEdit = QLineEdit()
-        self.searchEdit.setPlaceholderText("Например: Aatrox, Jinx, Yasuo...")
         self.searchEdit.textChanged.connect(self._apply_search)
         searchRow.addWidget(self.searchEdit, 1)
         layout.addLayout(searchRow)
@@ -121,24 +138,41 @@ class IconPickerDialog(QDialog):
         # ── Кнопки ───────────────────────────────────────────────────────────
         btnRow = QHBoxLayout()
 
-        btnBrowse = QPushButton("📂 Найти файл вне галереи...")
-        btnBrowse.setToolTip("Открыть системный диалог выбора файла")
-        btnBrowse.clicked.connect(self._browse_external)
-        btnRow.addWidget(btnBrowse)
+        self.btnBrowse = QPushButton()
+        self.btnBrowse.clicked.connect(self._browse_external)
+        btnRow.addWidget(self.btnBrowse)
 
         btnRow.addStretch()
 
-        btnCancel = QPushButton("Отмена")
-        btnCancel.clicked.connect(self.reject)
-        btnRow.addWidget(btnCancel)
+        self.btnCancel = QPushButton()
+        self.btnCancel.clicked.connect(self.reject)
+        btnRow.addWidget(self.btnCancel)
 
-        self.btnSelect = QPushButton("✔ Выбрать")
+        self.btnSelect = QPushButton()
         self.btnSelect.setObjectName("btnSuccess")
         self.btnSelect.setEnabled(False)
         self.btnSelect.clicked.connect(self.accept)
         btnRow.addWidget(self.btnSelect)
 
         layout.addLayout(btnRow)
+
+    # ── Перевод ───────────────────────────────────────────────────────────────
+
+    def retranslate_ui(self):
+        self.setWindowTitle(self._external_title or tr("icon_picker_title_champ"))
+        self.lblSearch.setText(tr("filter_search"))
+        self.searchEdit.setPlaceholderText(tr("icon_search_ph"))
+        self.btnBrowse.setText(tr("btn_browse_external"))
+        self.btnCancel.setText(tr("btn_cancel"))
+        self.btnSelect.setText(tr("btn_select"))
+        self._update_status_text()
+
+    def _update_status_text(self):
+        if not self._all_files:
+            self.lblStatus.setText(tr("no_icons_in_folder", folder=self.folder))
+        else:
+            shown = len(self._tiles)
+            self.lblStatus.setText(tr("icons_found", n=shown))
 
     # ── Загрузка иконок ──────────────────────────────────────────────────────
 
@@ -150,11 +184,6 @@ class IconPickerDialog(QDialog):
                     self._all_files.append(fn)
 
         self._render_grid(self._all_files)
-
-        if not self._all_files:
-            self.lblStatus.setText(
-                f"В папке {self.folder}/ пока нет иконок. "
-                "Можно выбрать файл вручную кнопкой «Найти файл вне галереи».")
 
     def _render_grid(self, files: list[str]):
         # Очищаем текущую сетку
@@ -173,7 +202,7 @@ class IconPickerDialog(QDialog):
             self.gridLayout.addWidget(tile, i // columns, i % columns)
             self._tiles.append(tile)
 
-        self.lblStatus.setText(f"Найдено иконок: {len(files)}")
+        self._update_status_text()
 
     def _apply_search(self, text: str):
         text = text.strip().lower()
@@ -201,8 +230,8 @@ class IconPickerDialog(QDialog):
 
     def _browse_external(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Выбрать файл иконки", self.full_folder,
-            "Изображения (*.png *.jpg *.jpeg *.webp)")
+            self, tr("btn_browse_external"), self.full_folder,
+            "Images (*.png *.jpg *.jpeg *.webp)")
         if path:
             self._selected_path = os.path.relpath(path, BASE_DIR)
             self._selected_name = os.path.splitext(os.path.basename(path))[0]

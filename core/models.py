@@ -40,8 +40,58 @@ DAMAGE_CLASS_COLORS = {
     "Гибрид":  "#9B59B6",   # фиолетовый текст
 }
 
-# Обратная совместимость со старым названием (на случай если где-то ещё используется)
+# Обратная совместимость со старым названием (на случу если где-то ещё используется)
 ROLE_COLORS = DAMAGE_CLASS_COLORS
+
+# ── Отображаемые имена для UI (перевод) ─────────────────────────────────────
+# ВАЖНО: внутренние значения (то, что хранится в JSON / Google Sheets) остаются
+# русскими строками ("Топ", "АД" и т.д.) для обратной совместимости со всеми
+# уже сохранёнными пресетами. Эти словари используются ТОЛЬКО для отображения
+# подписи на нужном языке интерфейса — сама логика и сортировка продолжают
+# работать с исходным (русским) ключом.
+
+ROLE_DISPLAY_KEYS = {
+    "Топ": "role_top",
+    "Лес": "role_jungle",
+    "Мид": "role_mid",
+    "Адк": "role_adc",
+    "Сап": "role_support",
+}
+
+DAMAGE_CLASS_DISPLAY_KEYS = {
+    "АД":      "class_ad",
+    "АП":      "class_ap",
+    "Танк":    "class_tank",
+    "Утилити": "class_utility",
+    "Гибрид":  "class_hybrid",
+}
+
+
+def role_display(role: str) -> str:
+    """Возвращает локализованное имя роли для текущего языка интерфейса."""
+    from core.i18n import tr
+    key = ROLE_DISPLAY_KEYS.get(role)
+    return tr(key) if key else role
+
+
+def damage_class_display(damage_class: str) -> str:
+    """Возвращает локализованное имя класса урона для текущего языка интерфейса."""
+    from core.i18n import tr
+    key = DAMAGE_CLASS_DISPLAY_KEYS.get(damage_class)
+    return tr(key) if key else damage_class
+
+
+TEAM_TYPE_DISPLAY_KEYS = {
+    "Наша команда": "team_ours",
+    "Противники":   "team_enemy",
+}
+
+
+def team_type_display(team_type: str) -> str:
+    """Возвращает локализованное имя типа команды для текущего языка интерфейса."""
+    from core.i18n import tr
+    key = TEAM_TYPE_DISPLAY_KEYS.get(team_type)
+    return tr(key) if key else team_type
 
 # ── Дата-классы ────────────────────────────────────────────────────────────────
 
