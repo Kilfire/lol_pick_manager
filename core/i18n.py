@@ -88,6 +88,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "role_mid":          {"ru": "Мид",  "en": "Mid"},
     "role_adc":          {"ru": "Адк",  "en": "ADC"},
     "role_support":      {"ru": "Сап",  "en": "Support"},
+    "role_substitute":   {"ru": "Замена", "en": "Sub"},
 
     # ── Классы урона ────────────────────────────────────────────────────────
     "class_ad":          {"ru": "АД",       "en": "AD"},
