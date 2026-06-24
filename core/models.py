@@ -151,8 +151,8 @@ class Champion:
         """Сортировка: сначала по роли (Топ→Сап), затем по классу урона (АД→Гибрид)."""
         return (
             ROLE_ORDER.get(self.role, 99),
-            DAMAGE_CLASS_ORDER.get(self.damage_class, 99),
             TIER_ORDER.get(self.tier, 99),
+            DAMAGE_CLASS_ORDER.get(self.damage_class, 99),
             self.name.lower(),
         )
 
