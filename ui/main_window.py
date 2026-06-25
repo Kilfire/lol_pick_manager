@@ -434,6 +434,17 @@ class MainWindow(QMainWindow):
             f"{self._current_preset.name}?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
+            # Удаляем локальный JSON-файл если он существует
+            safe_name = "".join(
+                c if c.isalnum() or c in " _-" else "_"
+                for c in self._current_preset.name).strip()
+            json_path = os.path.join(PRESETS_DIR, f"{safe_name}.json")
+            if os.path.exists(json_path):
+                try:
+                    os.remove(json_path)
+                except Exception:
+                    pass
+
             self._presets.remove(self._current_preset)
             self._current_preset = None
             self._refresh_preset_list()
@@ -457,7 +468,56 @@ class MainWindow(QMainWindow):
 
     def _on_auto_connect_done(self, ok: bool, msg: str):
         self._update_google_status()
-        self.statusBar().showMessage(f"☁ {msg}")
+        if ok:
+            self.statusBar().showMessage(f"☁ {msg} — синхронизация пресетов...")
+            # После успешного подключения автоматически подтягиваем все пресеты
+            # из Google Sheets, которых нет локально или которые там новее.
+            self._auto_sync_from_sheets()
+        else:
+            self.statusBar().showMessage(f"☁ {msg}")
+
+    def _auto_sync_from_sheets(self):
+        """Загружает все пресеты из Google Sheets при старте.
+        Если пресет уже есть локально — перезаписывает его версией из Sheets
+        (облако считается источником истины для командной работы).
+        Новые пресеты добавляются в список."""
+        if not sheets_manager.is_connected():
+            return
+        cloud_names = sheets_manager.list_presets()
+        if not cloud_names:
+            self.statusBar().showMessage("☁ Подключено — облако пустое")
+            return
+
+        updated = 0
+        added = 0
+        for name in cloud_names:
+            preset, _ = sheets_manager.load_preset(name)
+            if preset is None:
+                continue
+            # Сохраняем локально чтобы следующий запуск подхватил без сети
+            preset.save_local(PRESETS_DIR)
+            found = False
+            for i, p in enumerate(self._presets):
+                if p.name == name:
+                    self._presets[i] = preset
+                    found = True
+                    updated += 1
+                    break
+            if not found:
+                self._presets.append(preset)
+                added += 1
+
+        self._refresh_preset_list()
+        if self._presets:
+            self.listPresets.setCurrentRow(0)
+
+        parts = []
+        if updated:
+            parts.append(f"обновлено {updated}")
+        if added:
+            parts.append(f"добавлено {added}")
+        summary = ", ".join(parts) if parts else "без изменений"
+        self.statusBar().showMessage(f"☁ Синхронизация завершена — {summary}")
 
     def _open_google_dialog(self):
         dlg = GoogleSheetsDialog(self)

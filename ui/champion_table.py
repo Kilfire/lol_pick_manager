@@ -23,14 +23,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # (внутренний_id, ключ_перевода_заголовка, ширина)
 COLUMNS = [
-    ("icon",        "col_icon",      48),
+    ("icon",        "col_icon",      65),
     ("name",        "col_name",     140),
     ("role",        "col_role",      80),
     ("class",       "col_class",    110),
-    ("detailed",    "col_detailed", 120),
+    ("detailed",    "col_detailed", 130),
     ("build",       "col_build",    200),
     ("situational", "col_situational", 180),
-    ("tier",        "col_tier",      55),
+    ("tier",        "col_tier",      65),
     ("notes",       "col_notes",    180),
 ]
 
@@ -194,8 +194,13 @@ class ChampionTable(QWidget):
         for i, (_, _, w) in enumerate(COLUMNS):
             self.table.setColumnWidth(i, w)
 
-        self.table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.Stretch)   # Имя растягивается
+        # Все колонки можно растягивать мышью вручную (Interactive).
+        # Только последняя (Заметки) растягивается автоматически под оставшееся место.
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        header.setStretchLastSection(True)
+        # Минимальная ширина колонки имени — 80px, чтобы не схлопнуть случайно
+        header.setMinimumSectionSize(48)
 
         self.table.doubleClicked.connect(self._on_double_click)
         layout.addWidget(self.table, 1)

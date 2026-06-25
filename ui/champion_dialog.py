@@ -109,10 +109,14 @@ class BuildItemWidget(QWidget):
 
     def _remove(self):
         lang_manager.remove_listener(self.retranslate_ui)
-        parent_layout = self.parent().layout() if self.parent() else None
-        if parent_layout:
-            parent_layout.removeWidget(self)
-        self.deleteLater()
+        parent = self.parent()
+        if isinstance(parent, BuildSection):
+            parent._remove_widget(self)
+        else:
+            # Fallback на случай неожиданного родителя
+            if parent and parent.layout():
+                parent.layout().removeWidget(self)
+            self.deleteLater()
 
     def get_item(self) -> BuildItem:
         return BuildItem(name=self.nameEdit.text(), icon_path=self.item.icon_path)
@@ -143,20 +147,29 @@ class BuildSection(QGroupBox):
 
     def _add_widget(self, item: BuildItem):
         w = BuildItemWidget(item, self)
+        # insertWidget перед кнопкой "Добавить" (последний элемент лэйаута)
         self._layout.insertWidget(self._layout.count() - 1, w)
         self._widgets.append(w)
 
     def _add_empty(self):
         self._add_widget(BuildItem(""))
 
+    def _remove_widget(self, w: "BuildItemWidget"):
+        """Удаляет виджет из лэйаута И из списка _widgets, сохраняя порядок."""
+        if w in self._widgets:
+            self._widgets.remove(w)
+        self._layout.removeWidget(w)
+        w.deleteLater()
+
     def get_items(self) -> list:
+        """Возвращает предметы В ТОМ ЖЕ ПОРЯДКЕ, в котором они добавлены.
+        Использует self._widgets (а не обход лэйаута), потому что после
+        удаления элементов порядок в лэйауте и в _widgets может расходиться."""
         result = []
-        for i in range(self._layout.count() - 1):
-            widget = self._layout.itemAt(i).widget()
-            if isinstance(widget, BuildItemWidget):
-                item = widget.get_item()
-                if item.name:
-                    result.append(item)
+        for w in self._widgets:
+            item = w.get_item()
+            if item.name:
+                result.append(item)
         return result
 
 
